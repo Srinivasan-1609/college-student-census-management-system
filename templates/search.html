@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}Search — College Census{% endblock %}
+{% block page_title %}<i class="fa-solid fa-magnifying-glass"></i> Search Students{% endblock %}
+{% block content %}
+<div class="section-card">
+  <h2 class="section-title"><i class="fa-solid fa-filter"></i> Search Students</h2>
+  <form method="GET" action="{{ url_for('search') }}" id="searchForm">
+    <div class="search-bar-row">
+      <select name="field" class="form-control search-select">
+        <option value="full_name" {{ 'selected' if field=='full_name' }}>By Name</option>
+        <option value="roll_number" {{ 'selected' if field=='roll_number' }}>By Roll No</option>
+        <option value="census_id" {{ 'selected' if field=='census_id' }}>By Census ID</option>
+        <option value="mobile" {{ 'selected' if field=='mobile' }}>By Mobile</option>
+        <option value="department" {{ 'selected' if field=='department' }}>By Department</option>
+        <option value="course" {{ 'selected' if field=='course' }}>By Course</option>
+      </select>
+      <input type="text" name="q" value="{{ query }}" id="searchInput" class="form-control search-input" placeholder="Enter search term…"/>
+      <button type="submit" class="btn btn-primary"><i class="fa-solid fa-search"></i> Search</button>
+      {% if query %}<a href="{{ url_for('search') }}" class="btn btn-secondary"><i class="fa-solid fa-xmark"></i> Clear</a>{% endif %}
+    </div>
+  </form>
+</div>
+{% if query %}
+<div class="section-card">
+  <h2 class="section-title">Results for "<em>{{ query }}</em>" <span class="badge badge-blue">{{ students|length }}</span></h2>
+  {% if students %}
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead><tr><th>#</th><th>Census ID</th><th>Name</th><th>Roll No</th><th>Dept</th><th>Course</th><th>Year</th><th>Gender</th><th>Mobile</th><th>Category</th><th>Actions</th></tr></thead>
+      <tbody>
+      {% for s in students %}
+        <tr>
+          <td>{{ loop.index }}</td>
+          <td><span class="badge badge-blue">{{ s.census_id }}</span></td>
+          <td class="font-medium">{{ s.full_name }}</td>
+          <td>{{ s.roll_number }}</td>
+          <td>{{ s.department }}</td>
+          <td>{{ s.course }}</td>
+          <td><span class="badge badge-orange">Yr {{ s.year_of_study }}</span></td>
+          <td><span class="badge {{ 'badge-green' if s.gender=='Male' else 'badge-pink' if s.gender=='Female' else 'badge-gray' }}">{{ s.gender }}</span></td>
+          <td>{{ s.mobile }}</td>
+          <td><span class="badge badge-gray">{{ s.category }}</span></td>
+          <td class="action-cell">
+            <a href="{{ url_for('update', sid=s.student_id) }}" class="btn-sm btn-edit"><i class="fa-solid fa-pen-to-square"></i></a>
+            <button class="btn-sm btn-delete" onclick="confirmDelete({{ s.student_id }},'{{ s.full_name }}')"><i class="fa-solid fa-trash"></i></button>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state"><i class="fa-solid fa-user-slash"></i><p>No students found for "<strong>{{ query }}</strong>"</p></div>
+  {% endif %}
+</div>
+{% else %}
+<div class="section-card"><div class="empty-state"><i class="fa-solid fa-magnifying-glass"></i><p>Enter a search term above.</p></div></div>
+{% endif %}
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal-box">
+    <div class="modal-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+    <h3>Confirm Deletion</h3>
+    <p>Delete <strong id="deleteName"></strong>?</p>
+    <form method="POST" id="deleteForm">
+      <div class="modal-actions">
+        <button type="submit" class="btn btn-danger"><i class="fa-solid fa-trash"></i> Delete</button>
+        <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+function confirmDelete(id,name){document.getElementById('deleteName').textContent=name;document.getElementById('deleteForm').action='/delete/'+id;document.getElementById('deleteModal').classList.add('active');}
+function closeModal(){document.getElementById('deleteModal').classList.remove('active');}
+</script>
+{% endblock %}

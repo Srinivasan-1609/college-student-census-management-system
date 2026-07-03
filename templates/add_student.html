@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}Add Student — College Census{% endblock %}
+{% block page_title %}<i class="fa-solid fa-user-plus"></i> Add New Student{% endblock %}
+{% block content %}
+<div class="section-card">
+  <h2 class="section-title"><i class="fa-solid fa-id-card"></i> Student Census Registration Form</h2>
+  <form method="POST" action="{{ url_for('add_student') }}" id="addStudentForm" novalidate>
+    <div class="form-section-title"><i class="fa-solid fa-graduation-cap"></i> Academic Details</div>
+    <div class="form-grid">
+      <div class="form-group"><label>Roll Number <span class="req">*</span></label><input type="text" name="roll_number" id="roll_number" class="form-control" placeholder="e.g. CS2021001" required/><span class="field-error" id="err_roll_number"></span></div>
+      <div class="form-group"><label>Department <span class="req">*</span></label>
+        <select name="department" id="department" class="form-control" required onchange="updateCourses()">
+          <option value="">-- Select --</option>
+          {% for d in ['Computer Science','Information Technology','Electronics','Mechanical','Civil','Electrical','Business Administration','Commerce','Arts','Science','Mathematics','Physics','Chemistry','English'] %}<option>{{ d }}</option>{% endfor %}
+        </select><span class="field-error" id="err_department"></span></div>
+      <div class="form-group"><label>Course <span class="req">*</span></label><select name="course" id="course" class="form-control" required><option value="">-- Select Department First --</option></select><span class="field-error" id="err_course"></span></div>
+      <div class="form-group"><label>Year of Study <span class="req">*</span></label>
+        <select name="year_of_study" id="year_of_study" class="form-control" required>
+          <option value="">-- Select --</option><option value="1">1st Year</option><option value="2">2nd Year</option><option value="3">3rd Year</option><option value="4">4th Year</option><option value="5">5th Year</option>
+        </select><span class="field-error" id="err_year_of_study"></span></div>
+      <div class="form-group"><label>Admission Year <span class="req">*</span></label>
+        <select name="admission_year" id="admission_year" class="form-control" required><option value="">-- Select --</option>{% for y in range(2018,2026) %}<option>{{ y }}</option>{% endfor %}</select><span class="field-error" id="err_admission_year"></span></div>
+    </div>
+    <div class="form-section-title"><i class="fa-solid fa-user"></i> Personal Information</div>
+    <div class="form-grid">
+      <div class="form-group"><label>Full Name <span class="req">*</span></label><input type="text" name="full_name" id="full_name" class="form-control" placeholder="Student full name" required/><span class="field-error" id="err_full_name"></span></div>
+      <div class="form-group"><label>Father's Name <span class="req">*</span></label><input type="text" name="father_name" id="father_name" class="form-control" placeholder="Father's name" required/><span class="field-error" id="err_father_name"></span></div>
+      <div class="form-group"><label>Mother's Name <span class="req">*</span></label><input type="text" name="mother_name" id="mother_name" class="form-control" placeholder="Mother's name" required/><span class="field-error" id="err_mother_name"></span></div>
+      <div class="form-group"><label>Date of Birth <span class="req">*</span></label><input type="date" name="dob" id="dob" class="form-control" required onchange="calcAge()"/><span class="field-error" id="err_dob"></span></div>
+      <div class="form-group"><label>Age</label><input type="number" name="age" id="age" class="form-control" readonly placeholder="Auto-calculated"/></div>
+      <div class="form-group"><label>Gender <span class="req">*</span></label><select name="gender" id="gender" class="form-control" required><option value="">-- Select --</option><option>Male</option><option>Female</option><option>Other</option></select><span class="field-error" id="err_gender"></span></div>
+      <div class="form-group"><label>Blood Group</label><select name="blood_group" class="form-control"><option value="">-- Select --</option>{% for bg in ['A+','A-','B+','B-','AB+','AB-','O+','O-'] %}<option>{{ bg }}</option>{% endfor %}</select></div>
+      <div class="form-group"><label>Mobile <span class="req">*</span></label><input type="tel" name="mobile" id="mobile" class="form-control" placeholder="Student 10-digit" maxlength="10" required/><span class="field-error" id="err_mobile"></span></div>
+      <div class="form-group"><label>Parent Mobile <span class="req">*</span></label><input type="tel" name="parent_mobile" id="parent_mobile" class="form-control" placeholder="Parent 10-digit" maxlength="10" required/><span class="field-error" id="err_parent_mobile"></span></div>
+      <div class="form-group"><label>Email</label><input type="email" name="email" class="form-control" placeholder="Student email"/></div>
+      <div class="form-group"><label>Category <span class="req">*</span></label><select name="category" id="category" class="form-control" required><option value="">-- Select --</option>{% for c in ['General','OBC','SC','ST','EWS','NT','SBC','VJ-A','Other'] %}<option>{{ c }}</option>{% endfor %}</select><span class="field-error" id="err_category"></span></div>
+      <div class="form-group"><label>Religion</label><select name="religion" class="form-control"><option value="">-- Select --</option>{% for r in ['Hindu','Muslim','Christian','Sikh','Buddhist','Jain','Other'] %}<option>{{ r }}</option>{% endfor %}</select></div>
+      <div class="form-group"><label>Nationality</label><input type="text" name="nationality" class="form-control" value="Indian"/></div>
+    </div>
+    <div class="form-section-title"><i class="fa-solid fa-location-dot"></i> Address Details</div>
+    <div class="form-grid">
+      <div class="form-group fg-full"><label>Address <span class="req">*</span></label><textarea name="address" id="address" class="form-control" rows="2" placeholder="House, street, locality" required></textarea><span class="field-error" id="err_address"></span></div>
+      <div class="form-group"><label>City <span class="req">*</span></label><input type="text" name="city" id="city" class="form-control" placeholder="City" required/><span class="field-error" id="err_city"></span></div>
+      <div class="form-group"><label>District <span class="req">*</span></label><input type="text" name="district" id="district" class="form-control" placeholder="District" required/><span class="field-error" id="err_district"></span></div>
+      <div class="form-group"><label>State <span class="req">*</span></label><select name="state" id="state" class="form-control" required><option value="">-- Select --</option>{% for s in ['Andhra Pradesh','Assam','Bihar','Chhattisgarh','Goa','Gujarat','Haryana','Karnataka','Kerala','Madhya Pradesh','Maharashtra','Odisha','Punjab','Rajasthan','Tamil Nadu','Telangana','Uttar Pradesh','Uttarakhand','West Bengal','Delhi','Jammu & Kashmir','Puducherry'] %}<option>{{ s }}</option>{% endfor %}</select><span class="field-error" id="err_state"></span></div>
+      <div class="form-group"><label>Pincode <span class="req">*</span></label><input type="text" name="pincode" id="pincode" class="form-control" placeholder="6-digit" maxlength="6" required/><span class="field-error" id="err_pincode"></span></div>
+    </div>
+    <div class="form-section-title"><i class="fa-solid fa-indian-rupee-sign"></i> Socio-Economic Details</div>
+    <div class="form-grid">
+      <div class="form-group"><label>Annual Family Income (₹) <span class="req">*</span></label><input type="number" name="family_income" id="family_income" class="form-control" placeholder="Annual income" min="0" required/><span class="field-error" id="err_family_income"></span></div>
+      <div class="form-group"><label>Scholarship</label><select name="scholarship" class="form-control">{% for sc in ['None','Government Merit','SC/ST Scholarship','OBC Scholarship','Minority Scholarship','Sports Quota','Management Quota','Other'] %}<option>{{ sc }}</option>{% endfor %}</select></div>
+      <div class="form-group"><label>Hostel</label><select name="hostel" class="form-control"><option>Day Scholar</option><option>Hostel</option></select></div>
+      <div class="form-group"><label>Transport</label><select name="transport" class="form-control">{% for t in ['Own','College Bus','Public Transport','Walking','Cycling'] %}<option>{{ t }}</option>{% endfor %}</select></div>
+      <div class="form-group"><label>Disability</label><select name="disability" class="form-control">{% for dis in ['None','Visually Impaired','Hearing Impaired','Physically Challenged','Learning Disability','Other'] %}<option>{{ dis }}</option>{% endfor %}</select></div>
+    </div>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> Register Student</button>
+      <button type="reset" class="btn btn-secondary"><i class="fa-solid fa-rotate-left"></i> Reset</button>
+      <a href="{{ url_for('view_students') }}" class="btn btn-ghost"><i class="fa-solid fa-arrow-left"></i> Back</a>
+    </div>
+  </form>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+const courseMap={'Computer Science':['B.E Computer Science','B.Tech CSE','M.E CSE','MCA','BCA','B.Sc Computer Science'],'Information Technology':['B.E IT','B.Tech IT','M.Tech IT','B.Sc IT'],'Electronics':['B.E Electronics','B.Tech ECE','M.E VLSI','B.Sc Electronics'],'Mechanical':['B.E Mechanical','B.Tech Mechanical','M.E Manufacturing'],'Civil':['B.E Civil','B.Tech Civil','M.E Structural'],'Electrical':['B.E EEE','B.Tech Electrical','M.E Power Systems'],'Business Administration':['BBA','MBA','B.Com (CA)'],'Commerce':['B.Com','M.Com','B.Com Honours'],'Arts':['B.A','M.A','B.A Honours'],'Science':['B.Sc','M.Sc','B.Sc Honours'],'Mathematics':['B.Sc Maths','M.Sc Maths'],'Physics':['B.Sc Physics','M.Sc Physics'],'Chemistry':['B.Sc Chemistry','M.Sc Chemistry'],'English':['B.A English','M.A English','B.Ed']};
+function updateCourses(){const d=document.getElementById('department').value,s=document.getElementById('course');s.innerHTML='<option value="">-- Select Course --</option>';(courseMap[d]||[]).forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;s.appendChild(o);});}
+function calcAge(){const dob=document.getElementById('dob').value;if(!dob)return;const t=new Date(),b=new Date(dob);let a=t.getFullYear()-b.getFullYear();if(t.getMonth()<b.getMonth()||(t.getMonth()===b.getMonth()&&t.getDate()<b.getDate()))a--;document.getElementById('age').value=a>=0?a:0;}
+document.getElementById('addStudentForm').addEventListener('submit',function(e){
+  let ok=true;
+  ['roll_number','department','course','year_of_study','admission_year','full_name','father_name','mother_name','dob','gender','mobile','parent_mobile','category','address','city','district','state','pincode','family_income'].forEach(id=>{
+    const el=document.getElementById(id),err=document.getElementById('err_'+id);
+    if(err)err.textContent='';
+    if(el&&!el.value.trim()){if(err)err.textContent='Required.';if(el)el.classList.add('is-invalid');ok=false;}
+  });
+  ['mobile','parent_mobile'].forEach(id=>{const v=document.getElementById(id).value.trim(),err=document.getElementById('err_'+id);if(v&&!/^\d{10}$/.test(v)){if(err)err.textContent='10-digit required.';ok=false;}});
+  if(!ok){e.preventDefault();window.scrollTo({top:0,behavior:'smooth'});}
+});
+['mobile','parent_mobile','pincode'].forEach(id=>{const el=document.getElementById(id);if(el)el.addEventListener('input',function(){this.value=this.value.replace(/\D/g,'');});});
+</script>
+{% endblock %}

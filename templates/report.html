@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% block title %}Reports — College Census{% endblock %}
+{% block page_title %}<i class="fa-solid fa-chart-bar"></i> Census Reports{% endblock %}
+{% block head %}<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>{% endblock %}
+{% block content %}
+<div class="stat-grid stat-grid-4">
+  <div class="stat-card stat-blue"><div class="stat-icon"><i class="fa-solid fa-user-graduate"></i></div><div class="stat-info"><span class="stat-num">{{ total }}</span><span class="stat-label">Total Students</span></div></div>
+  <div class="stat-card stat-green"><div class="stat-icon"><i class="fa-solid fa-person"></i></div><div class="stat-info"><span class="stat-num">{{ male }}</span><span class="stat-label">Male</span></div></div>
+  <div class="stat-card stat-pink"><div class="stat-icon"><i class="fa-solid fa-person-dress"></i></div><div class="stat-info"><span class="stat-num">{{ female }}</span><span class="stat-label">Female</span></div></div>
+  <div class="stat-card stat-purple"><div class="stat-icon"><i class="fa-solid fa-genderless"></i></div><div class="stat-info"><span class="stat-num">{{ other_g }}</span><span class="stat-label">Other</span></div></div>
+</div>
+
+<!-- DOWNLOAD BAR -->
+<div class="section-card download-bar">
+  <h2 class="section-title"><i class="fa-solid fa-file-arrow-down"></i> Download Full Report</h2>
+  <div class="dl-buttons">
+    <a href="{{ url_for('download_pdf') }}" class="dl-btn dl-pdf">
+      <i class="fa-solid fa-file-pdf"></i>
+      <div><strong>Download PDF</strong><small>Professional report with charts summary</small></div>
+    </a>
+    <a href="{{ url_for('download_csv') }}" class="dl-btn dl-csv">
+      <i class="fa-solid fa-file-csv"></i>
+      <div><strong>Download CSV</strong><small>Full dataset for Excel/Spreadsheet</small></div>
+    </a>
+    {% if dept_data %}
+    <div class="dl-dept-wrap">
+      <label class="dl-dept-label"><i class="fa-solid fa-building-columns"></i> Department CSV</label>
+      <div class="dl-dept-btns">
+        {% for d in dept_data %}
+        <a href="{{ url_for('download_dept_csv', dept=d.department) }}" class="dl-dept-btn">{{ d.department if d.department is defined else d.district }}</a>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<div class="chart-row">
+  <div class="section-card chart-card">
+    <h2 class="section-title"><i class="fa-solid fa-chart-pie"></i> Gender Distribution</h2>
+    <canvas id="genderPie"></canvas>
+  </div>
+  <div class="section-card chart-card">
+    <h2 class="section-title"><i class="fa-solid fa-people-group"></i> Age-wise Distribution</h2>
+    <canvas id="ageBar"></canvas>
+    <div class="age-legend">
+      <span class="leg-item"><span class="leg-dot" style="background:#60a5fa"></span> Under 18: <b>{{ age_groups.minor or 0 }}</b></span>
+      <span class="leg-item"><span class="leg-dot" style="background:#34d399"></span> 18–21: <b>{{ age_groups.young or 0 }}</b></span>
+      <span class="leg-item"><span class="leg-dot" style="background:#fbbf24"></span> 22–25: <b>{{ age_groups.mid_age or 0 }}</b></span>
+      <span class="leg-item"><span class="leg-dot" style="background:#f87171"></span> 25+: <b>{{ age_groups.senior or 0 }}</b></span>
+    </div>
+  </div>
+</div>
+
+<div class="chart-row">
+  <div class="section-card chart-card">
+    <h2 class="section-title"><i class="fa-solid fa-building-columns"></i> Department-wise Students</h2>
+    {% if dept_data %}<canvas id="deptBar"></canvas>{% else %}<div class="empty-state small"><i class="fa-solid fa-chart-simple"></i><p>No data</p></div>{% endif %}
+  </div>
+  <div class="section-card chart-card">
+    <h2 class="section-title"><i class="fa-solid fa-book-open"></i> Course-wise Students</h2>
+    {% if course_data %}<canvas id="coursePie"></canvas>{% else %}<div class="empty-state small"><i class="fa-solid fa-chart-pie"></i><p>No data</p></div>{% endif %}
+  </div>
+</div>
+
+<div class="chart-row">
+  <div class="section-card chart-card">
+    <h2 class="section-title"><i class="fa-solid fa-layer-group"></i> Category Distribution</h2>
+    <canvas id="catPie"></canvas>
+  </div>
+  <div class="section-card chart-card">
+    <h2 class="section-title"><i class="fa-solid fa-indian-rupee-sign"></i> Family Income Groups</h2>
+    <canvas id="incomeDonut"></canvas>
+    <div class="age-legend">
+      <span class="leg-item"><span class="leg-dot" style="background:#f87171"></span> BPL (&lt;1L): <b>{{ income_data.bpl or 0 }}</b></span>
+      <span class="leg-item"><span class="leg-dot" style="background:#fbbf24"></span> Mid (1-5L): <b>{{ income_data.mid or 0 }}</b></span>
+      <span class="leg-item"><span class="leg-dot" style="background:#34d399"></span> High (&gt;5L): <b>{{ income_data.high or 0 }}</b></span>
+    </div>
+  </div>
+</div>
+
+{% if dept_data %}
+<div class="section-card">
+  <h2 class="section-title"><i class="fa-solid fa-table"></i> Department-wise Report</h2>
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead><tr><th>#</th><th>Department</th><th>Students</th><th>Share (%)</th><th>Bar</th><th>CSV</th></tr></thead>
+      <tbody>
+      {% for d in dept_data %}
+        <tr>
+          <td>{{ loop.index }}</td>
+          <td class="font-medium">{{ d.department }}</td>
+          <td><span class="badge badge-blue">{{ d.cnt }}</span></td>
+          <td>{{ "%.1f"|format(d.cnt/total*100) if total else 0 }}%</td>
+          <td><div class="mini-bar"><div class="mini-fill" style="width:{{ (d.cnt/dept_data[0].cnt*100)|int }}%"></div></div></td>
+          <td><a href="{{ url_for('download_dept_csv', dept=d.department) }}" class="btn-sm btn-edit" title="Download CSV"><i class="fa-solid fa-file-csv"></i></a></td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+{% if year_data %}
+<div class="section-card">
+  <h2 class="section-title"><i class="fa-solid fa-calendar-check"></i> Year-wise Student Count</h2>
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead><tr><th>Year of Study</th><th>Students</th><th>Percentage</th><th>Bar</th></tr></thead>
+      <tbody>
+      {% for y in year_data %}
+        <tr>
+          <td class="font-medium">Year {{ y.year_of_study }}</td>
+          <td><span class="badge badge-orange">{{ y.cnt }}</span></td>
+          <td>{{ "%.1f"|format(y.cnt/total*100) if total else 0 }}%</td>
+          <td><div class="mini-bar"><div class="mini-fill" style="width:{{ (y.cnt/total*100)|int if total else 0 }}%;background:#f97316"></div></div></td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
+{% block scripts %}
+<script>
+const C=['#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6','#ec4899','#14b8a6','#f97316','#06b6d4','#84cc16'];
+new Chart(document.getElementById('genderPie'),{type:'doughnut',data:{labels:['Male','Female','Other'],datasets:[{data:[{{ male }},{{ female }},{{ other_g }}],backgroundColor:['#3b82f6','#ec4899','#a78bfa'],borderWidth:3,borderColor:'#fff'}]},options:{plugins:{legend:{position:'bottom'}},cutout:'60%'}});
+new Chart(document.getElementById('ageBar'),{type:'bar',data:{labels:['Under 18','18–21','22–25','25+'],datasets:[{data:[{{ age_groups.minor or 0 }},{{ age_groups.young or 0 }},{{ age_groups.mid_age or 0 }},{{ age_groups.senior or 0 }}],backgroundColor:['#60a5fa','#34d399','#fbbf24','#f87171'],borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}});
+{% if dept_data %}
+new Chart(document.getElementById('deptBar'),{type:'bar',data:{labels:[{% for d in dept_data %}'{{ d.department }}'{{ ',' if not loop.last }}{% endfor %}],datasets:[{data:[{% for d in dept_data %}{{ d.cnt }}{{ ',' if not loop.last }}{% endfor %}],backgroundColor:C,borderRadius:4}]},options:{indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{beginAtZero:true}}}});
+{% endif %}
+{% if course_data %}
+new Chart(document.getElementById('coursePie'),{type:'pie',data:{labels:[{% for c in course_data %}'{{ c.course }}'{{ ',' if not loop.last }}{% endfor %}],datasets:[{data:[{% for c in course_data %}{{ c.cnt }}{{ ',' if not loop.last }}{% endfor %}],backgroundColor:C,borderWidth:2,borderColor:'#fff'}]},options:{plugins:{legend:{position:'right',labels:{boxWidth:12,font:{size:11}}}}}});
+{% endif %}
+{% if cat_data %}
+new Chart(document.getElementById('catPie'),{type:'doughnut',data:{labels:[{% for c in cat_data %}'{{ c.category }}'{{ ',' if not loop.last }}{% endfor %}],datasets:[{data:[{% for c in cat_data %}{{ c.cnt }}{{ ',' if not loop.last }}{% endfor %}],backgroundColor:C,borderWidth:3,borderColor:'#fff'}]},options:{plugins:{legend:{position:'bottom'}},cutout:'55%'}});
+{% endif %}
+new Chart(document.getElementById('incomeDonut'),{type:'doughnut',data:{labels:['BPL (<1L)','Mid (1-5L)','High (>5L)'],datasets:[{data:[{{ income_data.bpl or 0 }},{{ income_data.mid or 0 }},{{ income_data.high or 0 }}],backgroundColor:['#f87171','#fbbf24','#34d399'],borderWidth:3,borderColor:'#fff'}]},options:{plugins:{legend:{position:'bottom'}},cutout:'60%'}});
+</script>
+{% endblock %}

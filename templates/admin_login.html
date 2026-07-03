@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Admin Login — College Census</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+</head>
+<body class="auth-body auth-citizen">
+<div class="auth-wrap auth-split">
+  <div class="auth-left auth-left-admin">
+    <a href="{{ url_for('index') }}" class="back-home"><i class="fa-solid fa-arrow-left"></i> Back to Home</a>
+    <div class="auth-left-content">
+      <div class="auth-logo-lg"><i class="fa-solid fa-shield-halved"></i></div>
+      <h2>Admin Control Panel</h2>
+      <p>Full system access for college administration. Manage staff, view all records and system settings.</p>
+      <ul class="auth-perks">
+        <li><i class="fa-solid fa-circle-check"></i> Complete student database control</li>
+        <li><i class="fa-solid fa-circle-check"></i> Manage staff accounts</li>
+        <li><i class="fa-solid fa-circle-check"></i> Full census reports & downloads</li>
+        <li><i class="fa-solid fa-circle-check"></i> System-wide analytics</li>
+      </ul>
+    </div>
+    <div class="auth-left-footer">Default: <strong>admin / admin@123</strong></div>
+  </div>
+  <div class="auth-right">
+    <div class="auth-card auth-card-right">
+      <div class="auth-header">
+        <div class="auth-logo auth-logo-admin"><i class="fa-solid fa-shield-halved"></i></div>
+        <h1>Admin Login</h1>
+        <p>Restricted — Authorised personnel only</p>
+      </div>
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}{% for cat, msg in messages %}
+          <div class="alert alert-{{ cat }}"><i class="fa-solid fa-circle-exclamation"></i> {{ msg }}</div>
+        {% endfor %}{% endif %}
+      {% endwith %}
+      <form method="POST" id="adminForm" novalidate>
+        <div class="form-group">
+          <label><i class="fa-solid fa-user-shield"></i> Admin Username</label>
+          <input type="text" name="username" id="username" class="form-control" placeholder="Admin username" required/>
+          <span class="field-error" id="err_u"></span>
+        </div>
+        <div class="form-group">
+          <label><i class="fa-solid fa-lock"></i> Password</label>
+          <div class="input-eye">
+            <input type="password" name="password" id="password" class="form-control" placeholder="Admin password" required/>
+            <button type="button" class="eye-btn" onclick="togglePass()"><i class="fa-solid fa-eye" id="ei"></i></button>
+          </div>
+          <span class="field-error" id="err_p"></span>
+        </div>
+        <button type="submit" class="btn btn-danger btn-full"><i class="fa-solid fa-right-to-bracket"></i> Admin Login</button>
+      </form>
+      <div class="auth-divider"><span>other portals</span></div>
+      <div class="auth-switch-links">
+        <a href="{{ url_for('staff_login') }}" class="btn btn-secondary btn-full"><i class="fa-solid fa-chalkboard-user"></i> Staff Login</a>
+        <a href="{{ url_for('student_login') }}" class="admin-link"><i class="fa-solid fa-user-graduate"></i> Student Login</a>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+function togglePass(){const p=document.getElementById('password'),i=document.getElementById('ei');p.type=p.type==='password'?(i.className='fa-solid fa-eye-slash','text'):(i.className='fa-solid fa-eye','password');}
+document.getElementById('adminForm').addEventListener('submit',function(e){
+  let ok=true;
+  if(!document.getElementById('username').value.trim()){document.getElementById('err_u').textContent='Required.';ok=false;}
+  if(!document.getElementById('password').value.trim()){document.getElementById('err_p').textContent='Required.';ok=false;}
+  if(!ok)e.preventDefault();
+});
+</script>
+</body></html>

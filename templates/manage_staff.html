@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Manage Staff — College Census{% endblock %}
+{% block page_title %}<i class="fa-solid fa-users-gear"></i> Manage Staff{% endblock %}
+{% block content %}
+<div class="section-card">
+  <div class="section-header">
+    <h2 class="section-title"><i class="fa-solid fa-chalkboard-user"></i> Staff Members <span class="badge badge-blue">{{ staff_list|length }}</span></h2>
+    <a href="{{ url_for('staff_signup') }}" class="btn btn-primary" target="_blank"><i class="fa-solid fa-user-plus"></i> New Staff Signup</a>
+  </div>
+  {% if staff_list %}
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead><tr><th>#</th><th>Staff No</th><th>Name</th><th>Department</th><th>Designation</th><th>Email</th><th>Mobile</th><th>Username</th><th>Joined</th><th>Action</th></tr></thead>
+      <tbody>
+      {% for st in staff_list %}
+        <tr>
+          <td>{{ loop.index }}</td>
+          <td><span class="badge badge-purple">{{ st.staff_no }}</span></td>
+          <td class="font-medium">{{ st.full_name }}</td>
+          <td>{{ st.department }}</td>
+          <td>{{ st.designation }}</td>
+          <td>{{ st.email }}</td>
+          <td>{{ st.mobile }}</td>
+          <td><span class="badge badge-gray">{{ st.username }}</span></td>
+          <td>{{ st.created_at[:10] if st.created_at else '—' }}</td>
+          <td>
+            <button class="btn-sm btn-delete" onclick="confirmDeleteStaff({{ st.staff_id }},'{{ st.full_name }}')"><i class="fa-solid fa-trash"></i></button>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state"><i class="fa-solid fa-users-slash"></i><p>No staff registered yet.</p></div>
+  {% endif %}
+</div>
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal-box">
+    <div class="modal-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+    <h3>Remove Staff</h3>
+    <p>Remove <strong id="deleteName"></strong> from staff? This cannot be undone.</p>
+    <form method="POST" id="deleteForm">
+      <div class="modal-actions">
+        <button type="submit" class="btn btn-danger"><i class="fa-solid fa-trash"></i> Remove</button>
+        <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+function confirmDeleteStaff(id,name){document.getElementById('deleteName').textContent=name;document.getElementById('deleteForm').action='/delete_staff/'+id;document.getElementById('deleteModal').classList.add('active');}
+function closeModal(){document.getElementById('deleteModal').classList.remove('active');}
+</script>
+{% endblock %}

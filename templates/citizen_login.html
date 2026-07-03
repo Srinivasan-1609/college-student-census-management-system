@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Citizen Login — Census MS</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+</head>
+<body class="auth-body auth-citizen">
+
+<div class="auth-wrap auth-split">
+
+  <!-- LEFT PANEL -->
+  <div class="auth-left">
+    <a href="{{ url_for('index') }}" class="back-home"><i class="fa-solid fa-arrow-left"></i> Back to Home</a>
+    <div class="auth-left-content">
+      <div class="auth-logo-lg"><i class="fa-solid fa-landmark"></i></div>
+      <h2>Census Management System</h2>
+      <p>Access your registered census profile securely using your citizen credentials.</p>
+      <ul class="auth-perks">
+        <li><i class="fa-solid fa-circle-check"></i> View your Census ID</li>
+        <li><i class="fa-solid fa-circle-check"></i> See your registered details</li>
+        <li><i class="fa-solid fa-circle-check"></i> Secure session-based login</li>
+      </ul>
+    </div>
+    <div class="auth-left-footer">Not registered yet? <a href="{{ url_for('citizen_signup') }}">Sign up here</a></div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="auth-right">
+    <div class="auth-card auth-card-right">
+      <div class="auth-header">
+        <div class="auth-logo auth-logo-citizen"><i class="fa-solid fa-user-shield"></i></div>
+        <h1>Citizen Login</h1>
+        <p>Enter your credentials to access your portal</p>
+      </div>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}{% for cat, msg in messages %}
+          <div class="alert alert-{{ cat }}"><i class="fa-solid fa-circle-{{ 'check' if cat=='success' else 'exclamation' }}"></i> {{ msg }}</div>
+        {% endfor %}{% endif %}
+      {% endwith %}
+
+      <form method="POST" action="{{ url_for('citizen_login') }}" id="cLoginForm" novalidate>
+        <div class="form-group">
+          <label><i class="fa-solid fa-user"></i> Username</label>
+          <input type="text" name="c_username" id="c_username" class="form-control" placeholder="Your citizen username" required/>
+          <span class="field-error" id="err_u"></span>
+        </div>
+        <div class="form-group">
+          <label><i class="fa-solid fa-lock"></i> Password</label>
+          <div class="input-eye">
+            <input type="password" name="c_password" id="c_password" class="form-control" placeholder="Your password" required/>
+            <button type="button" class="eye-btn" onclick="togglePass('c_password','ei1')"><i class="fa-solid fa-eye" id="ei1"></i></button>
+          </div>
+          <span class="field-error" id="err_p"></span>
+        </div>
+        <button type="submit" class="btn btn-primary btn-full btn-citizen">
+          <i class="fa-solid fa-right-to-bracket"></i> Login to Portal
+        </button>
+      </form>
+
+      <div class="auth-divider"><span>or</span></div>
+      <div class="auth-switch-links">
+        <a href="{{ url_for('citizen_signup') }}" class="btn btn-secondary btn-full"><i class="fa-solid fa-user-plus"></i> Create New Account</a>
+        <a href="{{ url_for('admin_login') }}" class="admin-link"><i class="fa-solid fa-shield-halved"></i> Admin Login</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function togglePass(id, iconId) {
+  const i = document.getElementById(id), ic = document.getElementById(iconId);
+  if (i.type==='password'){ i.type='text'; ic.className='fa-solid fa-eye-slash'; }
+  else { i.type='password'; ic.className='fa-solid fa-eye'; }
+}
+document.getElementById('cLoginForm').addEventListener('submit', function(e) {
+  let ok = true;
+  document.getElementById('err_u').textContent = '';
+  document.getElementById('err_p').textContent = '';
+  if (!document.getElementById('c_username').value.trim()) { document.getElementById('err_u').textContent='Username is required.'; ok=false; }
+  if (!document.getElementById('c_password').value.trim()) { document.getElementById('err_p').textContent='Password is required.'; ok=false; }
+  if (!ok) e.preventDefault();
+});
+</script>
+</body>
+</html>

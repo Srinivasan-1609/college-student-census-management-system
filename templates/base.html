@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>{% block title %}College Census MS{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  {% block head %}{% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}">
+
+{% if session.get('admin') or session.get('staff_id') %}
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <i class="fa-solid fa-graduation-cap"></i>
+    <span>College<strong>Census</strong></span>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="{{ url_for('dashboard') }}"     class="nav-link {% if request.endpoint=='dashboard'     %}active{% endif %}"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+    <a href="{{ url_for('add_student') }}"   class="nav-link {% if request.endpoint=='add_student'   %}active{% endif %}"><i class="fa-solid fa-user-plus"></i> Add Student</a>
+    <a href="{{ url_for('view_students') }}" class="nav-link {% if request.endpoint=='view_students' %}active{% endif %}"><i class="fa-solid fa-users"></i> View Students</a>
+    <a href="{{ url_for('search') }}"        class="nav-link {% if request.endpoint=='search'        %}active{% endif %}"><i class="fa-solid fa-magnifying-glass"></i> Search</a>
+    <a href="{{ url_for('report') }}"        class="nav-link {% if request.endpoint=='report'        %}active{% endif %}"><i class="fa-solid fa-chart-bar"></i> Reports</a>
+    {% if session.get('admin') %}
+    <a href="{{ url_for('manage_staff') }}"  class="nav-link {% if request.endpoint=='manage_staff'  %}active{% endif %}"><i class="fa-solid fa-users-gear"></i> Manage Staff</a>
+    {% endif %}
+    <hr class="nav-divider"/>
+    <a href="{{ url_for('download_csv') }}"  class="nav-link nav-download"><i class="fa-solid fa-file-csv"></i> Download CSV</a>
+    <a href="{{ url_for('download_pdf') }}"  class="nav-link nav-download"><i class="fa-solid fa-file-pdf"></i> Download PDF</a>
+    <hr class="nav-divider"/>
+    <a href="{{ url_for('logout') }}" class="nav-link nav-logout"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+  </nav>
+  <div class="sidebar-footer">
+    <i class="fa-solid fa-{% if session.get('admin') %}shield-halved{% else %}chalkboard-user{% endif %}"></i>
+    <span>{{ session.get('admin_name') or session.get('staff_name','Staff') }}</span>
+  </div>
+</aside>
+
+<div class="main-wrapper">
+  <header class="topbar">
+    <button class="hamburger" id="hamburger" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
+    <div class="topbar-title">{% block page_title %}{% endblock %}</div>
+    <div class="topbar-actions">
+      <a href="{{ url_for('download_csv') }}" class="topbar-dl csv" title="Download CSV"><i class="fa-solid fa-file-csv"></i></a>
+      <a href="{{ url_for('download_pdf') }}" class="topbar-dl pdf" title="Download PDF"><i class="fa-solid fa-file-pdf"></i></a>
+      <div class="topbar-user">
+        <i class="fa-solid fa-circle-user"></i>
+        <span>{{ session.get('admin_name') or session.get('staff_name','Staff') }}</span>
+        <span class="role-badge">{{ 'Admin' if session.get('admin') else 'Staff' }}</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="content">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-container">
+          {% for cat, msg in messages %}
+            <div class="alert alert-{{ cat }}">
+              <i class="fa-solid fa-{% if cat=='success' %}circle-check{% elif cat=='danger' %}circle-exclamation{% elif cat=='warning' %}triangle-exclamation{% else %}circle-info{% endif %}"></i>
+              {{ msg }}
+              <button class="alert-close" onclick="this.parentElement.remove()">×</button>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </main>
+  <footer class="footer">© 2024 College Student Census Management System. All rights reserved.</footer>
+</div>
+
+{% else %}
+  {% block auth_content %}{% endblock %}
+{% endif %}
+
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

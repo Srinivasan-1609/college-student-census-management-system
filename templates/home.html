@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>College Student Census Management System</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+</head>
+<body class="home-body">
+<nav class="home-nav">
+  <div class="nav-brand"><i class="fa-solid fa-graduation-cap"></i><span>College<strong>Census</strong></span></div>
+  <div class="nav-links">
+    <a href="{{ url_for('student_login') }}"  class="nav-btn nav-outline"><i class="fa-solid fa-user-graduate"></i> Student Login</a>
+    <a href="{{ url_for('student_signup') }}" class="nav-btn nav-fill"><i class="fa-solid fa-user-plus"></i> Student Register</a>
+    <a href="{{ url_for('staff_login') }}"    class="nav-btn nav-staff"><i class="fa-solid fa-chalkboard-user"></i> Staff Login</a>
+    <a href="{{ url_for('admin_login') }}"    class="nav-btn nav-admin"><i class="fa-solid fa-shield-halved"></i> Admin</a>
+  </div>
+  <button class="nav-ham" id="navHam"><i class="fa-solid fa-bars"></i></button>
+  <div class="nav-mobile" id="navMobile">
+    <a href="{{ url_for('student_signup') }}"><i class="fa-solid fa-user-plus"></i> Student Register</a>
+    <a href="{{ url_for('student_login') }}"><i class="fa-solid fa-user-graduate"></i> Student Login</a>
+    <a href="{{ url_for('staff_signup') }}"><i class="fa-solid fa-user-tie"></i> Staff Signup</a>
+    <a href="{{ url_for('staff_login') }}"><i class="fa-solid fa-chalkboard-user"></i> Staff Login</a>
+    <a href="{{ url_for('admin_login') }}"><i class="fa-solid fa-shield-halved"></i> Admin Login</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-content">
+    <div class="hero-badge"><i class="fa-solid fa-university"></i> Digital Campus Initiative — College Census System</div>
+    <h1>College Student<br/><span>Census Management</span><br/>System</h1>
+    <p>A comprehensive digital platform to collect, manage and analyse student census data across all departments and courses. Register once — access your record anytime.</p>
+    <div class="hero-cta">
+      <a href="{{ url_for('student_signup') }}" class="btn-hero-primary"><i class="fa-solid fa-user-plus"></i> Student Registration</a>
+      <a href="{{ url_for('student_login') }}"  class="btn-hero-outline"><i class="fa-solid fa-right-to-bracket"></i> Student Login</a>
+    </div>
+    <div class="hero-stats">
+      <div class="hs"><span class="hs-num">100%</span><span class="hs-lbl">Digital</span></div>
+      <div class="hs-div"></div>
+      <div class="hs"><span class="hs-num">Secure</span><span class="hs-lbl">Data</span></div>
+      <div class="hs-div"></div>
+      <div class="hs"><span class="hs-num">PDF/CSV</span><span class="hs-lbl">Reports</span></div>
+    </div>
+  </div>
+  <div class="hero-visual">
+    <div class="hero-card hc1"><i class="fa-solid fa-user-graduate"></i><span>Student Registry</span></div>
+    <div class="hero-card hc2"><i class="fa-solid fa-chart-pie"></i><span>Census Reports</span></div>
+    <div class="hero-card hc3"><i class="fa-solid fa-chalkboard-user"></i><span>Staff Portal</span></div>
+    <div class="hero-card hc4"><i class="fa-solid fa-file-arrow-down"></i><span>PDF/CSV Export</span></div>
+  </div>
+</section>
+
+<section class="portals-section">
+  <div class="portals-inner">
+    <div class="sec-label">Choose Your Portal</div>
+    <h2>Three Access Levels</h2>
+    <div class="portal-cards">
+      <div class="portal-card pc-student">
+        <div class="pc-icon"><i class="fa-solid fa-user-graduate"></i></div>
+        <h3>Student Portal</h3>
+        <p>Register your census details, get your unique Student Census ID and view your complete profile.</p>
+        <div class="pc-actions">
+          <a href="{{ url_for('student_signup') }}" class="btn btn-primary"><i class="fa-solid fa-user-plus"></i> Register</a>
+          <a href="{{ url_for('student_login') }}"  class="btn btn-secondary"><i class="fa-solid fa-right-to-bracket"></i> Login</a>
+        </div>
+      </div>
+      <div class="portal-card pc-staff">
+        <div class="pc-icon"><i class="fa-solid fa-chalkboard-user"></i></div>
+        <h3>Staff Portal</h3>
+        <p>Manage student records, perform searches, generate and download PDF/CSV census reports.</p>
+        <div class="pc-actions">
+          <a href="{{ url_for('staff_signup') }}" class="btn btn-primary"><i class="fa-solid fa-user-plus"></i> Sign Up</a>
+          <a href="{{ url_for('staff_login') }}"  class="btn btn-secondary"><i class="fa-solid fa-right-to-bracket"></i> Login</a>
+        </div>
+      </div>
+      <div class="portal-card pc-admin">
+        <div class="pc-icon"><i class="fa-solid fa-shield-halved"></i></div>
+        <h3>Admin Panel</h3>
+        <p>Full system control — manage staff accounts, oversee all data and access complete analytics.</p>
+        <div class="pc-actions">
+          <a href="{{ url_for('admin_login') }}" class="btn btn-danger"><i class="fa-solid fa-right-to-bracket"></i> Admin Login</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="features">
+  <div class="features-inner">
+    <div class="sec-label">Key Features</div>
+    <h2>Everything in One Platform</h2>
+    <div class="feat-grid">
+      <div class="feat-card"><div class="feat-icon fi-blue"><i class="fa-solid fa-id-card"></i></div><h3>Student Registration</h3><p>Complete 30-field census form covering personal, academic, family and socio-economic details.</p></div>
+      <div class="feat-card"><div class="feat-icon fi-green"><i class="fa-solid fa-file-pdf"></i></div><h3>PDF Report Download</h3><p>Generate professional PDF census reports with summary stats and full student data table.</p></div>
+      <div class="feat-card"><div class="feat-icon fi-purple"><i class="fa-solid fa-file-csv"></i></div><h3>CSV Export</h3><p>Download complete or department-wise student data as CSV for Excel/spreadsheet analysis.</p></div>
+      <div class="feat-card"><div class="feat-icon fi-orange"><i class="fa-solid fa-chart-bar"></i></div><h3>Visual Analytics</h3><p>6 interactive charts — department, gender, age, course, category and income distributions.</p></div>
+      <div class="feat-card"><div class="feat-icon fi-teal"><i class="fa-solid fa-magnifying-glass"></i></div><h3>Advanced Search</h3><p>Search students by name, roll number, department, course or census ID instantly.</p></div>
+      <div class="feat-card"><div class="feat-icon fi-pink"><i class="fa-solid fa-user-tie"></i></div><h3>Staff Management</h3><p>Staff can sign up and manage student data. Admins can oversee all staff accounts.</p></div>
+    </div>
+  </div>
+</section>
+
+<footer class="home-footer">
+  <div class="hf-inner">
+    <div class="hf-brand"><i class="fa-solid fa-graduation-cap"></i><span>College<strong>Census</strong></span></div>
+    <p>© 2024 College Student Census Management System. All rights reserved.</p>
+    <div class="hf-links">
+      <a href="{{ url_for('student_signup') }}">Student Register</a>
+      <a href="{{ url_for('student_login') }}">Student Login</a>
+      <a href="{{ url_for('staff_login') }}">Staff Login</a>
+      <a href="{{ url_for('admin_login') }}">Admin</a>
+    </div>
+  </div>
+</footer>
+<script>
+document.getElementById('navHam').onclick = function(){
+  document.getElementById('navMobile').classList.toggle('open');
+};
+</script>
+</body>
+</html>

@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}View Students — College Census{% endblock %}
+{% block page_title %}<i class="fa-solid fa-users"></i> All Students{% endblock %}
+{% block content %}
+<div class="section-card">
+  <div class="section-header">
+    <h2 class="section-title"><i class="fa-solid fa-table-list"></i> Student Records <span class="badge badge-blue">{{ students|length }}</span></h2>
+    <div class="header-actions">
+      <input type="text" id="tableSearch" class="form-control sm-input" placeholder="Quick filter…" oninput="filterTable()"/>
+      <a href="{{ url_for('download_csv') }}" class="btn btn-teal"><i class="fa-solid fa-file-csv"></i> CSV</a>
+      <a href="{{ url_for('download_pdf') }}" class="btn btn-danger"><i class="fa-solid fa-file-pdf"></i> PDF</a>
+      <a href="{{ url_for('add_student') }}" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Add New</a>
+    </div>
+  </div>
+  {% if students %}
+  <div class="table-wrap">
+    <table class="data-table" id="studentsTable">
+      <thead><tr><th>#</th><th>Census ID</th><th>Name</th><th>Roll No</th><th>Department</th><th>Course</th><th>Year</th><th>Gender</th><th>Category</th><th>Mobile</th><th>Hostel</th><th>Actions</th></tr></thead>
+      <tbody>
+      {% for s in students %}
+        <tr>
+          <td>{{ loop.index }}</td>
+          <td><span class="badge badge-blue">{{ s.census_id }}</span></td>
+          <td class="font-medium">{{ s.full_name }}</td>
+          <td>{{ s.roll_number }}</td>
+          <td>{{ s.department }}</td>
+          <td>{{ s.course }}</td>
+          <td><span class="badge badge-orange">Year {{ s.year_of_study }}</span></td>
+          <td><span class="badge {{ 'badge-green' if s.gender=='Male' else 'badge-pink' if s.gender=='Female' else 'badge-gray' }}">{{ s.gender }}</span></td>
+          <td><span class="badge badge-gray">{{ s.category }}</span></td>
+          <td>{{ s.mobile }}</td>
+          <td><span class="badge {{ 'badge-purple' if s.hostel=='Hostel' else 'badge-gray' }}">{{ s.hostel }}</span></td>
+          <td class="action-cell">
+            <a href="{{ url_for('update', sid=s.student_id) }}" class="btn-sm btn-edit" title="Edit"><i class="fa-solid fa-pen-to-square"></i></a>
+            <button class="btn-sm btn-delete" onclick="confirmDelete({{ s.student_id }},'{{ s.full_name }}')" title="Delete"><i class="fa-solid fa-trash"></i></button>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state"><i class="fa-solid fa-users-slash"></i><p>No students registered yet.</p><a href="{{ url_for('add_student') }}" class="btn btn-primary"><i class="fa-solid fa-user-plus"></i> Add First Student</a></div>
+  {% endif %}
+</div>
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal-box">
+    <div class="modal-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+    <h3>Confirm Deletion</h3>
+    <p>Delete <strong id="deleteName"></strong>? This cannot be undone.</p>
+    <form method="POST" id="deleteForm">
+      <div class="modal-actions">
+        <button type="submit" class="btn btn-danger"><i class="fa-solid fa-trash"></i> Delete</button>
+        <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+function confirmDelete(id,name){document.getElementById('deleteName').textContent=name;document.getElementById('deleteForm').action='/delete/'+id;document.getElementById('deleteModal').classList.add('active');}
+function closeModal(){document.getElementById('deleteModal').classList.remove('active');}
+function filterTable(){const q=document.getElementById('tableSearch').value.toLowerCase();document.querySelectorAll('#studentsTable tbody tr').forEach(r=>{r.style.display=r.textContent.toLowerCase().includes(q)?'':' none';});}
+</script>
+{% endblock %}

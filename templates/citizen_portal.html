@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>My Census Portal — Census MS</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+</head>
+<body class="auth-body portal-body">
+
+<!-- PORTAL NAVBAR -->
+<nav class="portal-nav">
+  <div class="nav-brand">
+    <i class="fa-solid fa-landmark"></i>
+    <span>Census<strong>MS</strong></span>
+  </div>
+  <div class="portal-user-info">
+    <div class="portal-avatar"><i class="fa-solid fa-circle-user"></i></div>
+    <div>
+      <div class="portal-name">{{ citizen.name }}</div>
+      <div class="portal-id-badge"><i class="fa-solid fa-id-badge"></i> {{ citizen.census_id }}</div>
+    </div>
+  </div>
+  <a href="{{ url_for('citizen_logout') }}" class="btn btn-secondary portal-logout">
+    <i class="fa-solid fa-right-from-bracket"></i> Logout
+  </a>
+</nav>
+
+<div class="portal-wrap">
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}{% for cat, msg in messages %}
+      <div class="alert alert-{{ cat }}"><i class="fa-solid fa-circle-check"></i> {{ msg }}</div>
+    {% endfor %}{% endif %}
+  {% endwith %}
+
+  <!-- WELCOME BANNER -->
+  <div class="portal-banner">
+    <div class="pb-left">
+      <div class="pb-greeting">Welcome back,</div>
+      <div class="pb-name">{{ citizen.name }}</div>
+      <div class="pb-sub">Your census record is verified and active.</div>
+    </div>
+    <div class="pb-right">
+      <div class="pb-cid-box">
+        <div class="pb-cid-label"><i class="fa-solid fa-fingerprint"></i> Your Census ID</div>
+        <div class="pb-cid">{{ citizen.census_id }}</div>
+        <div class="pb-cid-note">Keep this ID for all government purposes</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUICK STATS -->
+  <div class="portal-stats">
+    <div class="ps-card">
+      <i class="fa-solid fa-calendar-days"></i>
+      <div>
+        <span class="ps-val">{{ citizen.age }}</span>
+        <span class="ps-lbl">Years Old</span>
+      </div>
+    </div>
+    <div class="ps-card">
+      <i class="fa-solid fa-{% if citizen.gender=='Male' %}person{% elif citizen.gender=='Female' %}person-dress{% else %}genderless{% endif %}"></i>
+      <div>
+        <span class="ps-val">{{ citizen.gender }}</span>
+        <span class="ps-lbl">Gender</span>
+      </div>
+    </div>
+    <div class="ps-card">
+      <i class="fa-solid fa-house-chimney-user"></i>
+      <div>
+        <span class="ps-val">{{ citizen.family_members }}</span>
+        <span class="ps-lbl">Family Members</span>
+      </div>
+    </div>
+    <div class="ps-card">
+      <i class="fa-solid fa-indian-rupee-sign"></i>
+      <div>
+        <span class="ps-val">₹{{ "{:,.0f}".format(citizen.income) }}</span>
+        <span class="ps-lbl">Annual Income</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- DETAILS SECTIONS -->
+  <div class="portal-sections">
+
+    <!-- Personal Info -->
+    <div class="ps-section">
+      <div class="pss-header"><i class="fa-solid fa-user"></i> Personal Information</div>
+      <div class="pss-grid">
+        <div class="pss-row"><span class="pss-label">Full Name</span><span class="pss-val">{{ citizen.name }}</span></div>
+        <div class="pss-row"><span class="pss-label">Father / Mother</span><span class="pss-val">{{ citizen.father_name }}</span></div>
+        <div class="pss-row"><span class="pss-label">Date of Birth</span><span class="pss-val">{{ citizen.dob }}</span></div>
+        <div class="pss-row"><span class="pss-label">Age</span><span class="pss-val">{{ citizen.age }} years</span></div>
+        <div class="pss-row"><span class="pss-label">Gender</span>
+          <span class="pss-val">
+            <span class="badge {{ 'badge-green' if citizen.gender=='Male' else 'badge-pink' if citizen.gender=='Female' else 'badge-gray' }}">{{ citizen.gender }}</span>
+          </span>
+        </div>
+        <div class="pss-row"><span class="pss-label">Mobile</span><span class="pss-val">{{ citizen.mobile }}</span></div>
+        <div class="pss-row"><span class="pss-label">Email</span><span class="pss-val">{{ citizen.email or '—' }}</span></div>
+      </div>
+    </div>
+
+    <!-- Address -->
+    <div class="ps-section">
+      <div class="pss-header"><i class="fa-solid fa-location-dot"></i> Address Details</div>
+      <div class="pss-grid">
+        <div class="pss-row fg-full"><span class="pss-label">Address</span><span class="pss-val">{{ citizen.address }}</span></div>
+        <div class="pss-row"><span class="pss-label">City</span><span class="pss-val">{{ citizen.city }}</span></div>
+        <div class="pss-row"><span class="pss-label">District</span><span class="pss-val">{{ citizen.district }}</span></div>
+        <div class="pss-row"><span class="pss-label">State</span><span class="pss-val">{{ citizen.state }}</span></div>
+        <div class="pss-row"><span class="pss-label">Pincode</span><span class="pss-val">{{ citizen.pincode }}</span></div>
+      </div>
+    </div>
+
+    <!-- Socio-Economic -->
+    <div class="ps-section">
+      <div class="pss-header"><i class="fa-solid fa-briefcase"></i> Socio-Economic Details</div>
+      <div class="pss-grid">
+        <div class="pss-row"><span class="pss-label">Education</span><span class="pss-val">{{ citizen.education }}</span></div>
+        <div class="pss-row"><span class="pss-label">Occupation</span><span class="pss-val">{{ citizen.occupation }}</span></div>
+        <div class="pss-row"><span class="pss-label">Family Members</span><span class="pss-val">{{ citizen.family_members }}</span></div>
+        <div class="pss-row"><span class="pss-label">Annual Income</span><span class="pss-val">₹{{ "{:,.0f}".format(citizen.income) }}</span></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- PRINT BUTTON -->
+  <div class="portal-actions">
+    <button class="btn btn-primary" onclick="window.print()"><i class="fa-solid fa-print"></i> Print My Record</button>
+    <a href="{{ url_for('index') }}" class="btn btn-secondary"><i class="fa-solid fa-house"></i> Back to Home</a>
+    <a href="{{ url_for('citizen_logout') }}" class="btn btn-ghost"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+  </div>
+
+  <div class="portal-registered-on">
+    <i class="fa-solid fa-clock"></i> Registered on: {{ citizen.created_at[:10] if citizen.created_at else 'N/A' }}
+  </div>
+</div>
+
+</body>
+</html>

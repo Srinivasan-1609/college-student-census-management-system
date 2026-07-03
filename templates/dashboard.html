@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — College Census{% endblock %}
+{% block page_title %}<i class="fa-solid fa-gauge-high"></i> Dashboard{% endblock %}
+{% block head %}<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>{% endblock %}
+{% block content %}
+<div class="stat-grid">
+  <div class="stat-card stat-blue"><div class="stat-icon"><i class="fa-solid fa-user-graduate"></i></div><div class="stat-info"><span class="stat-num">{{ stats.total }}</span><span class="stat-label">Total Students</span></div></div>
+  <div class="stat-card stat-green"><div class="stat-icon"><i class="fa-solid fa-person"></i></div><div class="stat-info"><span class="stat-num">{{ stats.male }}</span><span class="stat-label">Male Students</span></div></div>
+  <div class="stat-card stat-pink"><div class="stat-icon"><i class="fa-solid fa-person-dress"></i></div><div class="stat-info"><span class="stat-num">{{ stats.female }}</span><span class="stat-label">Female Students</span></div></div>
+  <div class="stat-card stat-purple"><div class="stat-icon"><i class="fa-solid fa-building-columns"></i></div><div class="stat-info"><span class="stat-num">{{ stats.depts }}</span><span class="stat-label">Departments</span></div></div>
+  <div class="stat-card stat-orange"><div class="stat-icon"><i class="fa-solid fa-house-chimney-user"></i></div><div class="stat-info"><span class="stat-num">{{ stats.hostel }}</span><span class="stat-label">Hostel Students</span></div></div>
+  <div class="stat-card stat-teal"><div class="stat-icon"><i class="fa-solid fa-award"></i></div><div class="stat-info"><span class="stat-num">{{ stats.scholar }}</span><span class="stat-label">Scholarship</span></div></div>
+  <div class="stat-card stat-indigo"><div class="stat-icon"><i class="fa-solid fa-chalkboard-user"></i></div><div class="stat-info"><span class="stat-num">{{ stats.staff_count }}</span><span class="stat-label">Staff Members</span></div></div>
+  <div class="stat-card stat-yellow"><div class="stat-icon"><i class="fa-solid fa-indian-rupee-sign"></i></div><div class="stat-info"><span class="stat-num">₹{{ "{:,.0f}".format(stats.avg_income) }}</span><span class="stat-label">Avg Family Income</span></div></div>
+</div>
+
+<div class="section-card">
+  <h2 class="section-title"><i class="fa-solid fa-bolt"></i> Quick Actions</h2>
+  <div class="quick-actions">
+    <a href="{{ url_for('add_student') }}"   class="qa-btn qa-blue"><i class="fa-solid fa-user-plus"></i><span>Add Student</span></a>
+    <a href="{{ url_for('view_students') }}" class="qa-btn qa-green"><i class="fa-solid fa-list"></i><span>View All</span></a>
+    <a href="{{ url_for('search') }}"        class="qa-btn qa-orange"><i class="fa-solid fa-search"></i><span>Search</span></a>
+    <a href="{{ url_for('report') }}"        class="qa-btn qa-purple"><i class="fa-solid fa-chart-pie"></i><span>Reports</span></a>
+    <a href="{{ url_for('download_csv') }}"  class="qa-btn qa-teal"><i class="fa-solid fa-file-csv"></i><span>CSV</span></a>
+    <a href="{{ url_for('download_pdf') }}"  class="qa-btn qa-red"><i class="fa-solid fa-file-pdf"></i><span>PDF</span></a>
+  </div>
+</div>
+
+<div class="chart-row">
+  <div class="section-card chart-card">
+    <h2 class="section-title"><i class="fa-solid fa-chart-pie"></i> Gender Distribution</h2>
+    <canvas id="genderChart" height="220"></canvas>
+  </div>
+  <div class="section-card chart-card">
+    <h2 class="section-title"><i class="fa-solid fa-building-columns"></i> Department-wise Students</h2>
+    <canvas id="deptChart" height="220"></canvas>
+  </div>
+</div>
+
+<div class="section-card">
+  <h2 class="section-title"><i class="fa-solid fa-clock-rotate-left"></i> Recently Added Students</h2>
+  {% if recent %}
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead><tr><th>Census ID</th><th>Name</th><th>Roll No</th><th>Department</th><th>Course</th><th>Year</th><th>Gender</th><th>Action</th></tr></thead>
+      <tbody>
+      {% for s in recent %}
+        <tr>
+          <td><span class="badge badge-blue">{{ s.census_id }}</span></td>
+          <td class="font-medium">{{ s.full_name }}</td>
+          <td>{{ s.roll_number }}</td>
+          <td>{{ s.department }}</td>
+          <td>{{ s.course }}</td>
+          <td><span class="badge badge-orange">Year {{ s.year_of_study }}</span></td>
+          <td><span class="badge {{ 'badge-green' if s.gender=='Male' else 'badge-pink' if s.gender=='Female' else 'badge-gray' }}">{{ s.gender }}</span></td>
+          <td><a href="{{ url_for('update', sid=s.student_id) }}" class="btn-sm btn-edit"><i class="fa-solid fa-pen"></i></a></td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state"><i class="fa-solid fa-database"></i><p>No students registered yet.</p><a href="{{ url_for('add_student') }}" class="btn btn-primary">Add First Student</a></div>
+  {% endif %}
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+new Chart(document.getElementById('genderChart'),{type:'doughnut',data:{labels:['Male','Female','Other'],datasets:[{data:[{{ stats.male }},{{ stats.female }},{{ stats.total - stats.male - stats.female }}],backgroundColor:['#3b82f6','#ec4899','#a78bfa'],borderWidth:3,borderColor:'#fff'}]},options:{plugins:{legend:{position:'bottom'}},cutout:'65%'}});
+fetch('/api/chart_data').then(r=>r.json()).then(d=>{
+  new Chart(document.getElementById('deptChart'),{type:'bar',data:{labels:d.departments.labels,datasets:[{label:'Students',data:d.departments.data,backgroundColor:'rgba(59,130,246,0.7)',borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}}});
+});
+</script>
+{% endblock %}

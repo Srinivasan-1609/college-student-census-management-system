@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Citizen Registration — Census MS</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+</head>
+<body class="auth-body signup-body">
+
+<div class="signup-wrap">
+
+  <!-- HEADER BAR -->
+  <div class="signup-topbar">
+    <a href="{{ url_for('index') }}" class="back-home"><i class="fa-solid fa-arrow-left"></i> Back to Home</a>
+    <div class="signup-brand"><i class="fa-solid fa-landmark"></i> CensusMS</div>
+    <a href="{{ url_for('citizen_login') }}" class="btn btn-secondary">Already registered? Login</a>
+  </div>
+
+  <div class="signup-card">
+    <div class="signup-header">
+      <div class="auth-logo auth-logo-citizen"><i class="fa-solid fa-user-plus"></i></div>
+      <h1>Citizen Registration</h1>
+      <p>Fill in your details to register in the national census database</p>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}{% for cat, msg in messages %}
+        <div class="alert alert-{{ cat }}"><i class="fa-solid fa-circle-{{ 'check' if cat=='success' else 'exclamation' }}"></i> {{ msg }}</div>
+      {% endfor %}{% endif %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('citizen_signup') }}" id="signupForm" novalidate>
+
+      <!-- ACCOUNT CREDENTIALS -->
+      <div class="form-section-title"><i class="fa-solid fa-key"></i> Account Credentials</div>
+      <div class="signup-cred-row">
+        <div class="form-group">
+          <label>Username <span class="req">*</span></label>
+          <input type="text" name="c_username" id="c_username" class="form-control" placeholder="Choose a unique username" required/>
+          <span class="field-error" id="err_c_username"></span>
+        </div>
+        <div class="form-group">
+          <label>Password <span class="req">*</span></label>
+          <div class="input-eye">
+            <input type="password" name="c_password" id="c_password" class="form-control" placeholder="Create a password" required/>
+            <button type="button" class="eye-btn" onclick="togglePass('c_password','ei1')"><i class="fa-solid fa-eye" id="ei1"></i></button>
+          </div>
+          <span class="field-error" id="err_c_password"></span>
+        </div>
+        <div class="form-group">
+          <label>Confirm Password <span class="req">*</span></label>
+          <div class="input-eye">
+            <input type="password" id="confirm_password" class="form-control" placeholder="Re-enter password" required/>
+            <button type="button" class="eye-btn" onclick="togglePass('confirm_password','ei2')"><i class="fa-solid fa-eye" id="ei2"></i></button>
+          </div>
+          <span class="field-error" id="err_confirm_password"></span>
+        </div>
+      </div>
+
+      <!-- PERSONAL INFO -->
+      <div class="form-section-title"><i class="fa-solid fa-user"></i> Personal Information</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Full Name <span class="req">*</span></label>
+          <input type="text" name="name" id="name" class="form-control" placeholder="Your full name" required/>
+          <span class="field-error" id="err_name"></span>
+        </div>
+        <div class="form-group">
+          <label>Father / Mother Name <span class="req">*</span></label>
+          <input type="text" name="father_name" id="father_name" class="form-control" placeholder="Father or mother name" required/>
+          <span class="field-error" id="err_father_name"></span>
+        </div>
+        <div class="form-group">
+          <label>Date of Birth <span class="req">*</span></label>
+          <input type="date" name="dob" id="dob" class="form-control" required onchange="calcAge()"/>
+          <span class="field-error" id="err_dob"></span>
+        </div>
+        <div class="form-group">
+          <label>Age</label>
+          <input type="number" name="age" id="age" class="form-control" placeholder="Auto-calculated" readonly/>
+        </div>
+        <div class="form-group">
+          <label>Gender <span class="req">*</span></label>
+          <select name="gender" id="gender" class="form-control" required>
+            <option value="">-- Select --</option>
+            <option>Male</option><option>Female</option><option>Other</option>
+          </select>
+          <span class="field-error" id="err_gender"></span>
+        </div>
+        <div class="form-group">
+          <label>Mobile Number <span class="req">*</span></label>
+          <input type="tel" name="mobile" id="mobile" class="form-control" placeholder="10-digit mobile" maxlength="10" required/>
+          <span class="field-error" id="err_mobile"></span>
+        </div>
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" name="email" id="email" class="form-control" placeholder="example@email.com"/>
+          <span class="field-error" id="err_email"></span>
+        </div>
+      </div>
+
+      <!-- ADDRESS -->
+      <div class="form-section-title"><i class="fa-solid fa-location-dot"></i> Address Details</div>
+      <div class="form-grid">
+        <div class="form-group fg-full">
+          <label>Address <span class="req">*</span></label>
+          <textarea name="address" id="address" class="form-control" rows="2" placeholder="House no, street, locality" required></textarea>
+          <span class="field-error" id="err_address"></span>
+        </div>
+        <div class="form-group">
+          <label>City <span class="req">*</span></label>
+          <input type="text" name="city" id="city" class="form-control" placeholder="City" required/>
+          <span class="field-error" id="err_city"></span>
+        </div>
+        <div class="form-group">
+          <label>District <span class="req">*</span></label>
+          <input type="text" name="district" id="district" class="form-control" placeholder="District" required/>
+          <span class="field-error" id="err_district"></span>
+        </div>
+        <div class="form-group">
+          <label>State <span class="req">*</span></label>
+          <select name="state" id="state" class="form-control" required>
+            <option value="">-- Select State --</option>
+            {% for s in ['Andhra Pradesh','Arunachal Pradesh','Assam','Bihar','Chhattisgarh','Goa','Gujarat',
+              'Haryana','Himachal Pradesh','Jharkhand','Karnataka','Kerala','Madhya Pradesh','Maharashtra',
+              'Manipur','Meghalaya','Mizoram','Nagaland','Odisha','Punjab','Rajasthan','Sikkim','Tamil Nadu',
+              'Telangana','Tripura','Uttar Pradesh','Uttarakhand','West Bengal',
+              'Delhi','Jammu & Kashmir','Ladakh','Puducherry'] %}
+              <option>{{ s }}</option>
+            {% endfor %}
+          </select>
+          <span class="field-error" id="err_state"></span>
+        </div>
+        <div class="form-group">
+          <label>Pincode <span class="req">*</span></label>
+          <input type="text" name="pincode" id="pincode" class="form-control" placeholder="6-digit pincode" maxlength="6" required/>
+          <span class="field-error" id="err_pincode"></span>
+        </div>
+      </div>
+
+      <!-- SOCIO-ECONOMIC -->
+      <div class="form-section-title"><i class="fa-solid fa-briefcase"></i> Socio-Economic Details</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Education Qualification <span class="req">*</span></label>
+          <select name="education" id="education" class="form-control" required>
+            <option value="">-- Select --</option>
+            <option>No Formal Education</option><option>Primary (1-5)</option>
+            <option>Middle (6-8)</option><option>Secondary (9-10)</option>
+            <option>Higher Secondary (11-12)</option><option>Diploma</option>
+            <option>Graduate</option><option>Post Graduate</option><option>Doctorate</option>
+          </select>
+          <span class="field-error" id="err_education"></span>
+        </div>
+        <div class="form-group">
+          <label>Occupation <span class="req">*</span></label>
+          <input type="text" name="occupation" id="occupation" class="form-control" placeholder="e.g. Farmer, Teacher, Engineer" required/>
+          <span class="field-error" id="err_occupation"></span>
+        </div>
+        <div class="form-group">
+          <label>Number of Family Members <span class="req">*</span></label>
+          <input type="number" name="family_members" id="family_members" class="form-control" placeholder="Total family size" min="1" required/>
+          <span class="field-error" id="err_family_members"></span>
+        </div>
+        <div class="form-group">
+          <label>Annual Income (₹) <span class="req">*</span></label>
+          <input type="number" name="income" id="income" class="form-control" placeholder="Annual income in rupees" min="0" required/>
+          <span class="field-error" id="err_income"></span>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary btn-citizen"><i class="fa-solid fa-paper-plane"></i> Submit Registration</button>
+        <button type="reset" class="btn btn-secondary" onclick="clearErrors()"><i class="fa-solid fa-rotate-left"></i> Reset</button>
+        <a href="{{ url_for('citizen_login') }}" class="btn btn-ghost"><i class="fa-solid fa-arrow-left"></i> Back to Login</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function calcAge() {
+  const dob = document.getElementById('dob').value;
+  if (!dob) return;
+  const today = new Date(), birth = new Date(dob);
+  let age = today.getFullYear() - birth.getFullYear();
+  if (today.getMonth() < birth.getMonth() ||
+     (today.getMonth()===birth.getMonth() && today.getDate()<birth.getDate())) age--;
+  document.getElementById('age').value = age >= 0 ? age : 0;
+}
+function clearErrors() {
+  document.querySelectorAll('.field-error').forEach(e=>e.textContent='');
+  document.querySelectorAll('.form-control').forEach(e=>e.classList.remove('is-invalid'));
+}
+function togglePass(id, iconId) {
+  const i=document.getElementById(id), ic=document.getElementById(iconId);
+  if(i.type==='password'){i.type='text';ic.className='fa-solid fa-eye-slash';}
+  else{i.type='password';ic.className='fa-solid fa-eye';}
+}
+document.getElementById('signupForm').addEventListener('submit', function(e) {
+  clearErrors(); let ok = true;
+  const required = ['c_username','c_password','name','father_name','dob','gender','mobile',
+                    'address','city','district','state','pincode','education','occupation',
+                    'family_members','income'];
+  required.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el || !el.value.trim()) {
+      const err = document.getElementById('err_'+id);
+      if (err) err.textContent = 'Required.';
+      if (el) el.classList.add('is-invalid');
+      ok = false;
+    }
+  });
+  const pw = document.getElementById('c_password').value;
+  const cp = document.getElementById('confirm_password').value;
+  if (pw && cp && pw !== cp) {
+    document.getElementById('err_confirm_password').textContent = 'Passwords do not match.';
+    document.getElementById('confirm_password').classList.add('is-invalid');
+    ok = false;
+  }
+  const mob = document.getElementById('mobile').value.trim();
+  if (mob && !/^\d{10}$/.test(mob)) {
+    document.getElementById('err_mobile').textContent = 'Enter valid 10-digit number.';
+    ok = false;
+  }
+  const pin = document.getElementById('pincode').value.trim();
+  if (pin && !/^\d{6}$/.test(pin)) {
+    document.getElementById('err_pincode').textContent = 'Enter valid 6-digit pincode.';
+    ok = false;
+  }
+  if (!ok) { e.preventDefault(); window.scrollTo({top:0,behavior:'smooth'}); }
+});
+document.getElementById('mobile').addEventListener('input',function(){this.value=this.value.replace(/\D/g,'');});
+document.getElementById('pincode').addEventListener('input',function(){this.value=this.value.replace(/\D/g,'');});
+</script>
+</body>
+</html>
